@@ -99,7 +99,7 @@ object Chip8Emulator extends SimpleSwingApplication {
       program.zipWithIndex.foreach {
         case (byte, z) =>
 
-          val address = z + 0x200
+          val address = INITIAL_PC.toInt + z
 
           val newMemory = state.memory.set(address, byte)
           state = state.copy(memory = newMemory)
@@ -110,11 +110,10 @@ object Chip8Emulator extends SimpleSwingApplication {
 
       var lastCountDownTime = System.nanoTime()
       val countDownIntervalNs60Hz = (1000 * 1000000) / 60
-
       var lastStepTime = System.nanoTime()
       val stepIntervalNs = 1 // TODO - speed knob //(1000.0 * 1000000) / 60
       while (true) {
-        // busy wait to eat up remaining time slice - to get more accurate timings
+        // busy wait to eat up remaining time slice - busy to get more accurate timings
         var now = System.nanoTime()
         var remainingNs = stepIntervalNs - (now - lastStepTime)
         while (remainingNs > 0) {
@@ -142,13 +141,12 @@ object Chip8Emulator extends SimpleSwingApplication {
         terminalComponent.updateView(state)
 
         soundStatus(state.soundTimer.ubyte > 0)
-        //soundStatus(true)
-
 
         // only update counters at 60hz
         now = System.nanoTime()
         remainingNs = countDownIntervalNs60Hz - (now - lastCountDownTime)
         if (remainingNs <= 0) {
+
           state = state.copy(
             delayTimer = decrementDelay(state),
             soundTimer = decrementSound(state),

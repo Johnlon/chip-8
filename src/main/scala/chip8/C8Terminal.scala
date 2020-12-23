@@ -53,6 +53,8 @@ class C8Terminal(
   gameScreen.preferredSize = new Dimension(PaneWidth, PaneHeight)
   gameScreen.font = new Font(FONT, scala.swing.Font.Plain.id, 10)
   gameScreen.editable = false
+  gameScreen.background = Color.BLACK
+  gameScreen.foreground = Color.WHITE
 
   val stateScreen = new TextArea()
   stateScreen.border = BorderFactory.createLineBorder(Color.RED)
@@ -67,6 +69,9 @@ class C8Terminal(
   instScreen.preferredSize = new Dimension(PaneWidth - statWidth, BotHeight)
   instScreen.editable = false
   instScreen.focusable = false
+
+  @volatile
+  private var instructionCount = 0
 
   def updateStats(): Unit = {
     val st = state.map {
@@ -95,8 +100,9 @@ class C8Terminal(
 
     stateScreen.text =
       f"""
+         |instruction count: $instructionCount%d
          |instruction rate : $instructionRate%4d/s
-         |pixel rate       : $drawRate%4d/s
+         |frame rate       : $drawRate%4d/s
          |${st.getOrElse("")}
          |""".stripMargin
 
@@ -214,6 +220,7 @@ class C8Terminal(
   def updateView(inst: Instruction): Unit = {
     Objects.requireNonNull(inst)
     instruction = Some(inst)
+    instructionCount += 1
     instCount += 1
     val elapsed = System.currentTimeMillis() - lastInstruction
     instructionRate = (1000 * instCount) / (1 + elapsed)
