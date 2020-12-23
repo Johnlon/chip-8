@@ -1,12 +1,21 @@
-<pre style="line-height : 20px">
+<p style="line-height : 20px; margin : 0; padding-top:0;">
 ░█████╗░  ██╗░░██╗  ██╗  ██████╗░  ░░░░░░  ░█████╗░
+<p/>
+<p style="line-height : 20px; margin : 0; padding-top:0;">
 ██╔══██╗  ██║░░██║  ██║  ██╔══██╗  ░░░░░░  ██╔══██╗
+<p/>
+<p style="line-height : 20px; margin : 0; padding-top:0;">
 ██║░░╚═╝  ███████║  ██║  ██████╔╝  █████╗  ╚█████╔╝
+<p/>
+<p style="line-height : 20px; margin : 0; padding-top:0;">
 ██║░░██╗  ██╔══██║  ██║  ██╔═══╝░  ╚════╝  ██╔══██╗
+<p/>
+<p style="line-height : 20px; margin : 0; padding-top:0;">
 ╚█████╔╝  ██║░░██║  ██║  ██║░░░░░  ░░░░░░  ╚█████╔╝
+<p/>
+<p style="line-height : 20px; margin : 0; padding-top:0;">
 ░╚════╝░  ╚═╝░░╚═╝  ╚═╝  ╚═╝░░░░░  ░░░░░░  ░╚════╝░
-
-</pre>
+<p/>
 
 
 # CHIP-8 Emulator
