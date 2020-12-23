@@ -1,4 +1,14 @@
-<p style="line-height : 10px; margin : 0; padding-top:0;">
+<style type="text/css">
+p {
+    font-size : 30px;
+    background-color : #cfc;
+    padding : 0;
+    margin : 0;
+    line-height : 20px;
+}
+</style>
+
+<p>
 ░█████╗░  ██╗░░██╗  ██╗  ██████╗░  ░░░░░░  ░█████╗░
 ██╔══██╗  ██║░░██║  ██║  ██╔══██╗  ░░░░░░  ██╔══██╗
 ██║░░╚═╝  ███████║  ██║  ██████╔╝  █████╗  ╚█████╔╝
