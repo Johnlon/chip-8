@@ -33,3 +33,8 @@ Also most games do seem to follow the practice of alignment to even memory addre
 Better still there does seem to be some source code avaiable for some games.
 
 So I now need to go back to working out how to convert a short game with few instruction types to SPAM-1, having it use the UART terminal for its 'screen'.
+
+
+## Credit 
+
+https://fsymbols.com/generators/carty/
