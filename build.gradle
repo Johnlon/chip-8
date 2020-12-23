@@ -1,0 +1,60 @@
+
+//project.buildDir=System.getProperty("java.io.tmpdir") + File.separator + "gradlebuild" + File.separator + project.name
+
+repositories {
+    mavenCentral()
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'scala'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+dependencies {
+
+    testCompile 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    compile 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+
+    implementation 'org.scala-lang:scala-library:2.13.3'
+
+    compile group: "org.scala-lang.modules", name: "scala-parser-combinators_2.13", version: "1.1.2"
+
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+    compile group: 'org.apache.commons', name: 'commons-text', version: '1.9'
+    compile group: 'org.scala-lang.modules', name: 'scala-swing_2.13', version: '3.0.0'
+
+    // tailer
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+
+
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'chip8.Chip8Emulator'
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+/*
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'Assembler'
+    }
+    baseName = 'all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+*/
