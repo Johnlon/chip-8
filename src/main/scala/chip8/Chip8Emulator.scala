@@ -32,6 +32,7 @@ object Chip8Emulator extends SwingApplication {
     if (terminalComponent.size == new Dimension(0, 0))
       terminalComponent.pack()
 
+    terminalComponent.title = romFileName
     terminalComponent.visible = true
 
     println("show keys")
@@ -88,6 +89,7 @@ object Chip8Emulator extends SwingApplication {
       var lastStepTime = System.nanoTime()
       val stepIntervalNs = (1000 * 1000000) / 500
       while (true) {
+
         // busy wait to eat up remaining time slice - busy to get more accurate timings
         var now = System.nanoTime()
         var remainingNs = stepIntervalNs - (now - lastStepTime)

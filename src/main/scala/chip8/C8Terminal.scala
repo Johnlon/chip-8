@@ -97,6 +97,7 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
       receiveKey(e)
 
     case DrawScreenEvent(bits) =>
+      gameScreen.requestFocus()
       drawCount += 1
       val now = System.currentTimeMillis()
       val elapsed = now - lastDraw
@@ -110,12 +111,15 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
       doRepaint(bits)
 
     case UpdateInstructionStatsEvent(inst) =>
+      gameScreen.requestFocus()
       updateInstView(inst)
 
     case UpdateStateEvent(state) =>
+      gameScreen.requestFocus()
       updateStatsView(state)
 
     case DisplayKeysEvent(keys) =>
+      gameScreen.requestFocus()
       val t = keys.keys.asScala.map {
         case (baseKey, detail) =>
           f"""Key : $baseKey%-8s ${detail.desc}
@@ -125,6 +129,7 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
       gameScreen.text = t
 
     case MessageEvent(s) =>
+      gameScreen.requestFocus()
       gameScreen.text = s
      // Thread.sleep(1000)
   }
