@@ -27,7 +27,7 @@ object Chip8Emulator extends SwingApplication {
 
     val props = loadProps(romFile)
     KeypressAdaptor.keysMappings = props.keyMappings
-    loadBeep(props.beepFile)
+    loadBeep(props)
 
     if (terminalComponent.size == new Dimension(0, 0))
       terminalComponent.pack()
@@ -39,8 +39,10 @@ object Chip8Emulator extends SwingApplication {
     val emulatorThread = new Thread(new Runnable() {
       override def run(): Unit = {
         while (true) {
-          terminalComponent.publish(DisplayKeysEvent(props))
-          Thread.sleep(3000)
+          if (!props.keys.isEmpty) {
+            terminalComponent.publish(DisplayKeysEvent(props))
+            Thread.sleep(3000)
+          }
 
           startEmulation(bytes)
           System.exit(1)
@@ -52,16 +54,20 @@ object Chip8Emulator extends SwingApplication {
     emulatorThread.start()
   }
 
+  private def message(s: String): Unit = {
+    terminalComponent.publish(MessageEvent(s))
+  }
+
   private def startEmulation(program: List[U8]): Unit = {
 
     try {
       if (program.isEmpty) sys.error("program is empty")
 
-      println("Init rom ...")
+      message("Init rom ...")
 
       var state = State()
 
-      println("Init fonts ...")
+      message("Init fonts ...")
       state = Fonts.installFonts(state)
 
       println("Loading program...")
@@ -74,7 +80,7 @@ object Chip8Emulator extends SwingApplication {
           state = state.copy(memory = newMemory)
       }
 
-      println("Run ...")
+      message("Run ...")
       var stepMode = false
 
       var lastCountDownTime = System.nanoTime()
@@ -147,15 +153,25 @@ object Chip8Emulator extends SwingApplication {
       new ExtraProps()
   }
 
-  private def loadBeep(beepFile: String): Unit = {
-    val sound = this.getClass.getResourceAsStream(beepFile)
-    Objects.requireNonNull(sound, "failed to load beep file : " + beepFile)
-    val audioInputStream = AudioSystem.getAudioInputStream(sound)
-    beep = AudioSystem.getClip
-    beep.open(audioInputStream)
+  private def loadBeep(props: ExtraProps): Unit = {
+    if (props.introMusic != null) {
+      loadMusic(props.introMusic)
+    }
+    val beepFile = props.beepFile
+    val clip: Clip = loadMusic(beepFile)
+    beep = clip
+  }
 
-    beep.start() // necessary to run once to avoid lag in game first time played
-    beep.setFramePosition(0)
+  private def loadMusic(beepFile: String) = {
+    val sound = this.getClass.getResourceAsStream(beepFile)
+    Objects.requireNonNull(sound, "failed to load sound file : " + beepFile)
+    val audioInputStream = AudioSystem.getAudioInputStream(sound)
+    val clip = AudioSystem.getClip
+    clip.open(audioInputStream)
+
+    clip.start() // necessary to run once to avoid lag in game first time played
+    clip.setFramePosition(0)
+    clip
   }
 
   private def soundStatus(play: Boolean): Unit = {
@@ -169,10 +185,12 @@ object Chip8Emulator extends SwingApplication {
     }
   }
 
+  var oldScreen = Seq.empty[Seq[Boolean]]
   private def drawScreen(state: State): Unit = {
     val pixels: Seq[Boolean] = state.screenBuffer.flatMap(x => intTo8Bits(x.ubyte).reverse)
     val data: Seq[Seq[Boolean]] = pixels.grouped(SCREEN_WIDTH).toSeq
-    terminalComponent.publish(DrawScreenEvent(data))
+    if (data != oldScreen) terminalComponent.publish(DrawScreenEvent(data))
+    oldScreen = data
   }
 
   private def debugHandler(stepModeIn: Boolean): Boolean = {
@@ -229,6 +247,7 @@ class Key {
 class ExtraProps {
   @BeanProperty var keys: java.util.Map[String, Key] = new util.HashMap[String, Key]()
   @BeanProperty var beepFile: String = "./ping_pong_8bit_beeep.aiff"
+  @BeanProperty var introMusic: String = null
 
   def keyMappings: Seq[(String, String)] = {
     if (keys == null) return Seq.empty

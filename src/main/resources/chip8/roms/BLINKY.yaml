@@ -1,0 +1,17 @@
+keys:
+  3:
+    desc: UP
+    alias: Up
+  6:
+    desc: Down
+    alias: Down
+  7:
+    desc: Left
+    alias: Left
+  8:
+    desc: Right
+    alias: Right
+
+beepFile: "./pacman_chomp.wav"
+
+introMusic: "./pacman_beginning.wav"

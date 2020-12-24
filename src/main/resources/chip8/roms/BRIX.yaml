@@ -5,8 +5,3 @@ keys:
   6:
     desc: Move Right
     alias:  Right
-  5:
-    desc: Fire
-    alias:  Space
-
-beepFile: "./invaderkilled.wav"
