@@ -9,3 +9,6 @@ case class DrawScreenEvent(buf: Seq[Seq[Boolean]]) extends scala.swing.event.Eve
   )
 }
 
+case class UpdateInstructionStatsEvent(inst: Instruction) extends scala.swing.event.Event
+case class UpdateStateEvent(state: State) extends scala.swing.event.Event
+

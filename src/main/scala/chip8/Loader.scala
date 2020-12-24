@@ -14,7 +14,7 @@ import scala.collection.mutable.ListBuffer
 // load bytes into an array of ints with msb to the left
 object Loader extends App {
 
-  def rom(name: String): File = new File("src/main/resources/chip8/roms/", name)
+  def resolveRom(name: String): File = new File("src/main/resources/chip8/roms/", name)
 
   def read(file: File): List[U8] = {
     val dataIn = new FileInputStream(file)
