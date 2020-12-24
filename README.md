@@ -9,6 +9,8 @@ This emulator will help me understand CHIP-8 and decide whether I can also write
 
 Current status is that this emulator works including a beep sound that can be heard when playing pong.
 
+![PONG](pong.png)
+
 ## Things I Learned
 
 Seems many CHIP-8 games don't have source code.
