@@ -1,0 +1,15 @@
+keys:
+  D:
+    desc: Down - left player
+    alias:  Down
+  C:
+    desc: Up - right player
+    alias:  Up
+  1:
+    desc: Up - left player
+    alias:  A
+  4:
+    desc: Down - left player
+    alias:  Z
+
+beepFile: "./ping_pong_8bit_beeep.aiff"
