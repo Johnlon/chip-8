@@ -15,7 +15,7 @@ case class State(
                   delayTimer: U8 = U8(0),
                   soundTimer: U8 = U8(0),
                   fontCharLocation: Int => U12 = Fonts.fontCharLocation,
-                  pressedKeys: Set[Key.Value] = Set(),
+                  pressedKeys: Set[String] = Set(),
                 ) {
 
   if (pc.toInt % 2 != 0) {

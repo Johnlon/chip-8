@@ -24,7 +24,7 @@ object KeyMap {
 
   def isKeyPressed(state: State, key: U8): Boolean = {
     keyMap.get(key).exists {
-      c8Key => state.pressedKeys.contains(c8Key)
+      c8Key => state.pressedKeys.contains(c8Key.toString)
     }
   }
 }

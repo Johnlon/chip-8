@@ -5,33 +5,38 @@ import scala.swing.event.{Key, KeyEvent, KeyPressed, KeyReleased}
 object KeypressAdaptor {
 
   @volatile
-  private var keys = Set.empty[Key.Value]
+  private var keys = Set.empty[String]
 
   @volatile
-  var keysMappings = Seq.empty[(Key.Value, Key.Value)]
+  var keysMappings = Seq.empty[(String, String)]
 
-  def pressedKeys: Set[Key.Value] = {
+  def pressedKeys: Set[String] = {
     keys
+  }
+
+  def isPressed(k: Key.Value): Boolean = {
+    keys.contains(k.toString)
   }
 
   def registerKeypress(ke: KeyEvent): Unit = {
     ke match {
       case KeyPressed(_, k, _, _) =>
-        val effK: Key.Value = keyAlternatives(k)
+        val effK = keyAlternatives(k)
         keys = keys + effK
       case KeyReleased(_, k, _, _) =>
-        val effK: Key.Value = keyAlternatives(k)
+        val effK = keyAlternatives(k)
         keys = keys - effK
       case _ => // ignore
     }
   }
 
   // seek http://www.sunrise-ev.com/photos/1802/Chip8interpreter.pdf
-  private def keyAlternatives(k: Key.Value): Key.Value = {
+  private def keyAlternatives(k: Key.Value): String = {
+    val keyName = k.toString
     // can't map by Key.Value type because this is a crap Scala enum that doesn't
     // guarantee identity of each value - there can be more than one instance of Key.Up in memory
     // only the name is reliably preserved
-    val value = keysMappings.filter(_._1.toString == k.toString).map(_._2).headOption.getOrElse(k)
+    val value = keysMappings.filter(_._1 == keyName).map(_._2).headOption.getOrElse(keyName)
     value
   }
 }

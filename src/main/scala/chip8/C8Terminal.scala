@@ -6,6 +6,7 @@ import chip8.C8Terminal._
 import javax.swing.BorderFactory
 import javax.swing.border.EmptyBorder
 
+import scala.jdk.CollectionConverters.MapHasAsScala
 import scala.swing.event._
 import scala.swing.{Rectangle, _}
 
@@ -112,6 +113,17 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
 
     case UpdateStateEvent(i) =>
       updateStatsView(i)
+
+    case DisplayKeysEvent(keys) =>
+      val alias = "alias"
+      val space = ""
+      val t = keys.keys.asScala.map {
+        case (baseKey, detail) =>
+          f"""Key : $baseKey%-8s ${detail.desc}
+             |      ${detail.alias}
+             |""".stripMargin
+      }.mkString("\n")
+      gameScreen.text = t
   }
 
   contents = new BoxPanel(Orientation.Vertical) {
