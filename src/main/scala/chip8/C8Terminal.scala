@@ -170,7 +170,8 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
          |stack             : $stack
          |keys              : $keys
          |sound timer       : $soundTimer%-3d
-         |delay timer       : $delayTimer%-3d         |""".stripMargin
+         |delay timer       : $delayTimer%-3d
+         |""".stripMargin
   }
 
   private def updateInstView(instruction: Instruction): Unit = {

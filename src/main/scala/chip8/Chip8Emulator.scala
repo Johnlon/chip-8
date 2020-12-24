@@ -1,21 +1,33 @@
 package chip8
 
-import java.io.File
+import java.beans.BeanProperty
+import java.io.{File, FileInputStream}
 
 import chip8.Instructions.decode
+import chip8.KeypressAdaptor.{pressedKeys, registerKeypress}
 import javax.sound.sampled.AudioSystem
+import javax.xml.crypto.dsig.keyinfo.KeyValue
+import org.yaml.snakeyaml.constructor.Constructor
 
+import scala.jdk.CollectionConverters.MapHasAsScala
 import scala.swing.event.Key
 import scala.swing.{Dimension, SwingApplication}
 
 object Chip8Emulator extends SwingApplication {
 
-  private val terminalComponent = new C8Terminal(receiveKey = KeypressAdaptor.registerKeypress)
+  private var beepFile: String = null
+
+  private val terminalComponent = new C8Terminal(receiveKey = registerKeypress)
 
   override def startup(args: Array[String]): Unit = {
-    val romFile = args(0)
-    val romData: File = Loader.resolveRom(romFile)
-    val bytes: List[U8] = Loader.read(romData)
+    val romFileName = args(0)
+    val romFile: File = Loader.resolveRom(romFileName)
+    val bytes: List[U8] = Loader.read(romFile)
+
+    val maybeProps = loadProps(romFile)
+    maybeProps.foreach { kp =>
+      KeypressAdaptor.keysMappings = kp.keyMappings
+    }
 
     if (terminalComponent.size == new Dimension(0, 0))
       terminalComponent.pack()
@@ -25,7 +37,7 @@ object Chip8Emulator extends SwingApplication {
     val emulatorThread = new Thread(new Runnable() {
       override def run(): Unit = {
         while (true) {
-          startEmulation(bytes)
+          startEmulation(bytes, maybeProps)
           System.exit(1)
           System.out.println("exit!")
         }
@@ -35,7 +47,12 @@ object Chip8Emulator extends SwingApplication {
     emulatorThread.start()
   }
 
-  private def startEmulation(program: List[U8]): Unit = {
+  private def startEmulation(program: List[U8], props: Option[ExtraProps]): Unit = {
+
+    props.foreach {
+      p =>
+        beepFile = p.beepFile
+    }
 
     try {
       if (program.isEmpty) sys.error("program is empty")
@@ -82,7 +99,7 @@ object Chip8Emulator extends SwingApplication {
 
         // load keyboard state
         state = state.copy(
-          pressedKeys = KeypressAdaptor.pressedKeys
+          pressedKeys = pressedKeys
         )
 
         // do exec
@@ -116,8 +133,20 @@ object Chip8Emulator extends SwingApplication {
     }
   }
 
-  private val beep = {
-    val sound = this.getClass.getResourceAsStream("./ping_pong_8bit_beeep.aiff")
+  private def loadProps(romFile: File): Option[ExtraProps] = {
+    val propsFile = new File(romFile.getAbsolutePath + ".yaml")
+    if (romFile.exists()) {
+      import org.yaml.snakeyaml.Yaml
+      val yaml = new Yaml(new Constructor(classOf[ExtraProps]))
+      val inputStream = new FileInputStream(propsFile)
+      val obj = yaml.load(inputStream).asInstanceOf[ExtraProps]
+      Some(obj)
+    } else
+      None
+  }
+
+  private lazy val beep = {
+    val sound = this.getClass.getResourceAsStream(beepFile)
     val audioInputStream = AudioSystem.getAudioInputStream(sound)
     val clip = AudioSystem.getClip
     clip.open(audioInputStream)
@@ -142,25 +171,27 @@ object Chip8Emulator extends SwingApplication {
   }
 
   private def debugHandler(stepModeIn: Boolean): Boolean = {
+    import KeypressAdaptor._
+
     var stepMode = stepModeIn
-    if (KeypressAdaptor.pressedKeys.contains(Key.Escape)) {
+    if (pressedKeys.contains(Key.Escape)) {
       stepMode = !stepMode
-      while (KeypressAdaptor.pressedKeys.contains(Key.Escape)) {
+      while (pressedKeys.contains(Key.Escape)) {
         // wait for release
       }
     }
     if (stepMode) {
-      while (!KeypressAdaptor.pressedKeys.contains(Key.Enter) && !KeypressAdaptor.pressedKeys.contains(Key.Escape)) {
+      while (!pressedKeys.contains(Key.Enter) && !pressedKeys.contains(Key.Escape)) {
         // wait for key
       }
-      if (KeypressAdaptor.pressedKeys.contains(Key.Escape)) {
+      if (pressedKeys.contains(Key.Escape)) {
         stepMode = !stepMode
-        while (KeypressAdaptor.pressedKeys.contains(Key.Escape)) {
+        while (pressedKeys.contains(Key.Escape)) {
           // wait for release
         }
       }
-      if (KeypressAdaptor.pressedKeys.contains(Key.Enter)) {
-        while (KeypressAdaptor.pressedKeys.contains(Key.Enter)) {
+      if (pressedKeys.contains(Key.Enter)) {
+        while (pressedKeys.contains(Key.Enter)) {
           // wait for release
         }
       }
@@ -183,3 +214,17 @@ object Chip8Emulator extends SwingApplication {
   }
 }
 
+class ExtraProps {
+  @BeanProperty var mappings: java.util.Map[String, String] = null
+  @BeanProperty var beepFile: String = "./ping_pong_8bit_beeep.aiff"
+
+  def keyMappings: Seq[(Key.Value, Key.Value)] = {
+    if (mappings == null) return Seq.empty
+    mappings.asScala.map {
+      case (k, v) =>
+        val from = Key.withName(k)
+        val to = Key.withName(v)
+        (from, to)
+    }.toSeq
+  }
+}

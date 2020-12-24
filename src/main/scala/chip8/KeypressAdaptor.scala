@@ -7,6 +7,9 @@ object KeypressAdaptor {
   @volatile
   private var keys = Set.empty[Key.Value]
 
+  @volatile
+  var keysMappings = Seq.empty[(Key.Value, Key.Value)]
+
   def pressedKeys: Set[Key.Value] = {
     keys
   }
@@ -25,12 +28,11 @@ object KeypressAdaptor {
 
   // seek http://www.sunrise-ev.com/photos/1802/Chip8interpreter.pdf
   private def keyAlternatives(k: Key.Value): Key.Value = {
-    if (k == Key.Up || k == Key.I) Key.Key2
-    else if (k == Key.Left || k == Key.J) Key.Key4
-    else if (k == Key.Right || k == Key.K) Key.Key6
-    else if (k == Key.Down || k == Key.M) Key.Key8
-    else if (k == Key.Space) Key.Key5
-    else k
+    // can't map by Key.Value type because this is a crap Scala enum that doesn't
+    // guarantee identity of each value - there can be more than one instance of Key.Up in memory
+    // only the name is reliably preserved
+    val value = keysMappings.filter(_._1.toString == k.toString).map(_._2).headOption.getOrElse(k)
+    value
   }
 }
 
