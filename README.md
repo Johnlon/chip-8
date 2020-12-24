@@ -3,7 +3,7 @@
 
 # CHIP-8 Emulator
 
-A CHIP-8 Emulator written in Scala as part of my SPAM-1 project. 
+A CHIP-8 Emulator written in Scala as part of my [SPAM-1 project](https://hackaday.io/project/166922-spam-1-8-bit-cpu). 
 
 This emulator will help me understand CHIP-8 and decide whether I can also write a cross compiler from CHIP-8 to SPAM-1 so I can bootstrap SPAM-1 with some existing software.
 
