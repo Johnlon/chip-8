@@ -18,11 +18,12 @@ case class State(
                   pressedKeys: Set[String] = Set(),
                 ) {
 
-  if (pc.toInt % 2 != 0) {
-//    sys.error("odd pc " + pc)
-  }
   if (stack.length > 16) {
     sys.error("Stack may not exceed 16 levels but got " + stack.length)
+  }
+
+  def currentInstruction: Instruction = {
+    Instructions.decode(this)
   }
 
   def clearScreen(): State = {

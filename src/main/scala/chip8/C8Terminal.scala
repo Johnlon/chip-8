@@ -7,6 +7,7 @@ import javax.swing.BorderFactory
 import javax.swing.border.EmptyBorder
 
 import scala.jdk.CollectionConverters.MapHasAsScala
+import scala.swing.Dialog.{Message, Options}
 import scala.swing.event._
 import scala.swing.{Rectangle, _}
 
@@ -108,11 +109,11 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
 
       doRepaint(bits)
 
-    case UpdateInstructionStatsEvent(i) =>
-      updateInstView(i)
+    case UpdateInstructionStatsEvent(inst) =>
+      updateInstView(inst)
 
-    case UpdateStateEvent(i) =>
-      updateStatsView(i)
+    case UpdateStateEvent(state) =>
+      updateStatsView(state)
 
     case DisplayKeysEvent(keys) =>
       val alias = "alias"
@@ -150,7 +151,15 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
     gameScreen.text = t
   }
 
+  private var shownPcWarning = false
   private def updateStatsView(state: State): Unit = {
+
+    if (state.pc.toInt % 2 != 0) {
+      if (!shownPcWarning) {
+        Dialog.showConfirmation(this, "odd pc " + state.pc + " : " + state.currentInstruction, optionType= Options.OkCancel, messageType = Message.Warning)
+        shownPcWarning = true
+      }
+    }
 
     def printReg(regIdx: Seq[(chip8.U8, Int)]): String = {
       regIdx.map { case (z, i) =>

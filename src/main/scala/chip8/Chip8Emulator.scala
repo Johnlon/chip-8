@@ -2,11 +2,12 @@ package chip8
 
 import java.beans.BeanProperty
 import java.io.{File, FileInputStream}
+import java.util
 import java.util.Objects
 
 import chip8.Instructions.decode
 import chip8.KeypressAdaptor.{pressedKeys, registerKeypress}
-import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.{AudioSystem, Clip}
 import org.yaml.snakeyaml.constructor.Constructor
 
 import scala.jdk.CollectionConverters.MapHasAsScala
@@ -15,7 +16,7 @@ import scala.swing.{Dimension, SwingApplication}
 
 object Chip8Emulator extends SwingApplication {
 
-  private var beepFile: String = null
+  private var beep: Clip = null
 
   private val terminalComponent = new C8Terminal(receiveKey = registerKeypress)
 
@@ -24,10 +25,9 @@ object Chip8Emulator extends SwingApplication {
     val romFile: File = Loader.resolveRom(romFileName)
     val bytes: List[U8] = Loader.read(romFile)
 
-    val maybeProps = loadProps(romFile)
-    maybeProps.foreach { kp =>
-      KeypressAdaptor.keysMappings = kp.keyMappings
-    }
+    val props = loadProps(romFile)
+    KeypressAdaptor.keysMappings = props.keyMappings
+    loadBeep(props.beepFile)
 
     if (terminalComponent.size == new Dimension(0, 0))
       terminalComponent.pack()
@@ -39,12 +39,10 @@ object Chip8Emulator extends SwingApplication {
     val emulatorThread = new Thread(new Runnable() {
       override def run(): Unit = {
         while (true) {
-          maybeProps.foreach { props =>
-            terminalComponent.publish(DisplayKeysEvent(props))
-            Thread.sleep(3000)
-          }
+          terminalComponent.publish(DisplayKeysEvent(props))
+          Thread.sleep(3000)
 
-          startEmulation(bytes, maybeProps)
+          startEmulation(bytes)
           System.exit(1)
           System.out.println("exit!")
         }
@@ -54,12 +52,7 @@ object Chip8Emulator extends SwingApplication {
     emulatorThread.start()
   }
 
-  private def startEmulation(program: List[U8], props: Option[ExtraProps]): Unit = {
-
-    props.foreach {
-      p =>
-        beepFile = p.beepFile
-    }
+  private def startEmulation(program: List[U8]): Unit = {
 
     try {
       if (program.isEmpty) sys.error("program is empty")
@@ -140,25 +133,29 @@ object Chip8Emulator extends SwingApplication {
     }
   }
 
-  private def loadProps(romFile: File): Option[ExtraProps] = {
+  private def loadProps(romFile: File): ExtraProps = {
     val propsFile = new File(romFile.getAbsolutePath + ".yaml")
-    if (romFile.exists()) {
+    if (propsFile.exists()) {
+
       import org.yaml.snakeyaml.Yaml
+
       val yaml = new Yaml(new Constructor(classOf[ExtraProps]))
       val inputStream = new FileInputStream(propsFile)
       val obj = yaml.load(inputStream).asInstanceOf[ExtraProps]
-      Some(obj)
+      obj
     } else
-      None
+      new ExtraProps()
   }
 
-  private lazy val beep = {
+  private def loadBeep(beepFile: String): Unit = {
     val sound = this.getClass.getResourceAsStream(beepFile)
-    Objects.requireNonNull(sound, "failed to load beep file : "+ beepFile)
+    Objects.requireNonNull(sound, "failed to load beep file : " + beepFile)
     val audioInputStream = AudioSystem.getAudioInputStream(sound)
-    val clip = AudioSystem.getClip
-    clip.open(audioInputStream)
-    clip
+    beep = AudioSystem.getClip
+    beep.open(audioInputStream)
+
+    beep.start() // necessary to run once to avoid lag in game first time played
+    beep.setFramePosition(0)
   }
 
   private def soundStatus(play: Boolean): Unit = {
@@ -168,7 +165,7 @@ object Chip8Emulator extends SwingApplication {
         beep.start()
       }
     } else {
-      beep.stop()
+      //beep.stop()
     }
   }
 
@@ -179,6 +176,7 @@ object Chip8Emulator extends SwingApplication {
   }
 
   private def debugHandler(stepModeIn: Boolean): Boolean = {
+
     import KeypressAdaptor._
 
     var stepMode = stepModeIn
@@ -223,13 +221,13 @@ object Chip8Emulator extends SwingApplication {
 }
 
 class Key {
-  @BeanProperty var desc:String = null
-  @BeanProperty var alias:String = null
+  @BeanProperty var desc: String = null
+  @BeanProperty var alias: String = null
 
 }
 
 class ExtraProps {
-  @BeanProperty var keys: java.util.Map[String, Key] = null
+  @BeanProperty var keys: java.util.Map[String, Key] = new util.HashMap[String, Key]()
   @BeanProperty var beepFile: String = "./ping_pong_8bit_beeep.aiff"
 
   def keyMappings: Seq[(String, String)] = {

@@ -35,6 +35,6 @@ object RunChip8Emulator extends App {
   private val PARTICLE  = "Particle Demo [zeroZshadow, 2008].ch8"
 
 
-  Chip8Emulator.main(Array(PONG))
+  Chip8Emulator.main(Array("INVADERS"))
 }
 
