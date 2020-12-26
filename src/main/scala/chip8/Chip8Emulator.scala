@@ -16,9 +16,9 @@ import scala.swing.{Dimension, SwingApplication}
 
 object Chip8Emulator extends SwingApplication {
 
-  private var beep: Clip = null
-
   private val terminalComponent = new C8Terminal(receiveKey = registerKeypress)
+  var oldScreen = Seq.empty[Seq[Boolean]]
+  private var beep: Clip = null
 
   override def startup(args: Array[String]): Unit = {
     val romFileName = args(0)
@@ -53,10 +53,6 @@ object Chip8Emulator extends SwingApplication {
     })
 
     emulatorThread.start()
-  }
-
-  private def message(s: String): Unit = {
-    terminalComponent.publish(MessageEvent(s))
   }
 
   private def startEmulation(program: List[U8]): Unit = {
@@ -141,39 +137,8 @@ object Chip8Emulator extends SwingApplication {
     }
   }
 
-  private def loadProps(romFile: File): ExtraProps = {
-    val propsFile = new File(romFile.getAbsolutePath + ".yaml")
-    if (propsFile.exists()) {
-
-      import org.yaml.snakeyaml.Yaml
-
-      val yaml = new Yaml(new Constructor(classOf[ExtraProps]))
-      val inputStream = new FileInputStream(propsFile)
-      val obj = yaml.load(inputStream).asInstanceOf[ExtraProps]
-      obj
-    } else
-      new ExtraProps()
-  }
-
-  private def loadBeep(props: ExtraProps): Unit = {
-    if (props.introMusic != null) {
-      loadMusic(props.introMusic)
-    }
-    val beepFile = props.beepFile
-    val clip: Clip = loadMusic(beepFile)
-    beep = clip
-  }
-
-  private def loadMusic(beepFile: String) = {
-    val sound = this.getClass.getResourceAsStream(beepFile)
-    Objects.requireNonNull(sound, "failed to load sound file : " + beepFile)
-    val audioInputStream = AudioSystem.getAudioInputStream(sound)
-    val clip = AudioSystem.getClip
-    clip.open(audioInputStream)
-
-    clip.start() // necessary to run once to avoid lag in game first time played
-    clip.setFramePosition(0)
-    clip
+  private def message(s: String): Unit = {
+    terminalComponent.publish(MessageEvent(s))
   }
 
   private def soundStatus(play: Boolean): Unit = {
@@ -187,7 +152,6 @@ object Chip8Emulator extends SwingApplication {
     }
   }
 
-  var oldScreen = Seq.empty[Seq[Boolean]]
   private def drawScreen(state: State): Unit = {
     val pixels: Seq[Boolean] = state.screenBuffer.flatMap(x => intTo8Bits(x.ubyte).reverse)
     val data: Seq[Seq[Boolean]] = pixels.grouped(SCREEN_WIDTH).toSeq
@@ -237,6 +201,41 @@ object Chip8Emulator extends SwingApplication {
       state.soundTimer - 1
     } else
       U8(0)
+  }
+
+  private def loadProps(romFile: File): ExtraProps = {
+    val propsFile = new File(romFile.getAbsolutePath + ".yaml")
+    if (propsFile.exists()) {
+
+      import org.yaml.snakeyaml.Yaml
+
+      val yaml = new Yaml(new Constructor(classOf[ExtraProps]))
+      val inputStream = new FileInputStream(propsFile)
+      val obj = yaml.load(inputStream).asInstanceOf[ExtraProps]
+      obj
+    } else
+      new ExtraProps()
+  }
+
+  private def loadBeep(props: ExtraProps): Unit = {
+    if (props.introMusic != null) {
+      loadMusic(props.introMusic)
+    }
+    val beepFile = props.beepFile
+    val clip: Clip = loadMusic(beepFile)
+    beep = clip
+  }
+
+  private def loadMusic(beepFile: String) = {
+    val sound = this.getClass.getResourceAsStream(beepFile)
+    Objects.requireNonNull(sound, "failed to load sound file : " + beepFile)
+    val audioInputStream = AudioSystem.getAudioInputStream(sound)
+    val clip = AudioSystem.getClip
+    clip.open(audioInputStream)
+
+    clip.start() // necessary to run once to avoid lag in game first time played
+    clip.setFramePosition(0)
+    clip
   }
 }
 

@@ -14,23 +14,20 @@ import scala.swing.{Rectangle, _}
 object C8Terminal {
 
   val FONT = "Courier New"
-
-  def BLANK: PixelType = ' '
-
-  def BLOCK: PixelType = 0x2588.toChar
-
   val NO_CHAR: Char = 0
-
   // control
   val WRITE: Char = 'd'
   val SETX: Char = 'x'
   val SETY: Char = 'y'
-
   // data
   val K_UP: Char = 'U'
   val K_DOWN: Char = 'D'
   val K_LEFT: Char = 'L'
   val K_RIGHT: Char = 'R'
+
+  def BLANK: PixelType = ' '
+
+  def BLOCK: PixelType = 0x2588.toChar
 
 }
 
@@ -41,18 +38,6 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
   private val PaneHeight = 400
   private val BotHeight = 300
   private val statWidth = PaneWidth * 2 / 3
-
-  private var lastInstructionTime = System.currentTimeMillis()
-  private var totalInstCount = 0
-  private var instCount = 0
-  private var instructionRate = 0L
-
-  private var lastDraw: Long = System.currentTimeMillis()
-  private var drawCount = 0
-  private var drawRate = 0L
-
-  bounds = new Rectangle(50, 50, PaneWidth, PaneHeight + BotHeight)
-
   private val gameScreen = {
     val gameScreen = new TextArea()
     gameScreen.border = BorderFactory.createLineBorder(Color.BLUE)
@@ -63,7 +48,6 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
     gameScreen.foreground = Color.WHITE
     gameScreen
   }
-
   private val stateScreen = {
     val stateScreen = new TextArea()
     stateScreen.border = BorderFactory.createLineBorder(Color.RED)
@@ -73,7 +57,6 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
     stateScreen.focusable = false
     stateScreen
   }
-
   private val instScreen = {
     val instScreen = new TextArea()
     instScreen.border = BorderFactory.createLineBorder(Color.GREEN)
@@ -83,6 +66,15 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
     instScreen.focusable = false
     instScreen
   }
+  private var lastInstructionTime = System.currentTimeMillis()
+  private var totalInstCount = 0
+  private var instCount = 0
+  private var instructionRate = 0L
+
+  bounds = new Rectangle(50, 50, PaneWidth, PaneHeight + BotHeight)
+  private var lastDraw: Long = System.currentTimeMillis()
+  private var drawCount = 0
+  private var drawRate = 0L
 
   gameScreen.requestFocus()
 
@@ -131,7 +123,7 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
     case MessageEvent(s) =>
       gameScreen.requestFocus()
       gameScreen.text = s
-     // Thread.sleep(1000)
+    // Thread.sleep(1000)
   }
 
   contents = new BoxPanel(Orientation.Vertical) {
@@ -144,6 +136,11 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
       contents ++= Seq(stateScreen, instScreen)
     }
     contents ++= Seq(left, right)
+  }
+  private var shownPcWarning = false
+
+  def displayError(ex: Throwable): Unit = {
+    gameScreen.text = ex.toString
   }
 
   private def doRepaint(screen: Seq[Seq[Boolean]]): Unit = {
@@ -158,12 +155,11 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
     gameScreen.text = t
   }
 
-  private var shownPcWarning = false
   private def updateStatsView(state: State): Unit = {
 
     if (state.pc.toInt % 2 != 0) {
       if (!shownPcWarning) {
-        Dialog.showConfirmation(this, "odd pc " + state.pc + " : " + state.currentInstruction, optionType= Options.OkCancel, messageType = Message.Warning)
+        Dialog.showConfirmation(this, "odd pc " + state.pc + " : " + state.currentInstruction, optionType = Options.OkCancel, messageType = Message.Warning)
         shownPcWarning = true
       }
     }
@@ -217,9 +213,5 @@ class C8Terminal(receiveKey: KeyEvent => Unit) extends MainFrame with Publisher 
     //    val text = instruction.toString + curText.substring(0, Math.min(curText.length, 1000))
     //    instScreen.text = text
     instScreen.text = instruction.toString
-  }
-
-  def displayError(ex: Throwable): Unit = {
-    gameScreen.text = ex.toString
   }
 }

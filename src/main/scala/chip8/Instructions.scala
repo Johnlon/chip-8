@@ -65,13 +65,13 @@ object Instructions {
       case 0x8000 if ___N == 0x3 => XEqLogicalXor(opS, _X__, __Y_)
       case 0x8000 if ___N == 0x4 => AddXPlusYCarry(opS, _X__, __Y_)
       case 0x8000 if ___N == 0x5 => XEqXMinusY(opS, _X__, __Y_)
-      case 0x8000 if ___N == 0x6 => XShiftRight(opS, _X__)  //  __N_ not used
+      case 0x8000 if ___N == 0x6 => XShiftRight(opS, _X__) //  __N_ not used
       case 0x8000 if ___N == 0x7 => XEqYMinusX(opS, _X__, __Y_)
-      case 0x8000 if ___N == 0xE => XShiftLeft(opS, _X__)   //  __N_ not used
+      case 0x8000 if ___N == 0xE => XShiftLeft(opS, _X__) //  __N_ not used
 
       case 0x9000 if ___N == 0 => SkipIfXNeY(opS, _X__, __Y_)
       case 0xA000 => SetIndex(opS, _NNN)
-      case 0xB000 => ???
+      case 0xB000 => sys.error("BXXX not implemented")
       case 0xC000 => XEqRandom(opS, _X__, __NN)
       case 0xD000 => Display(opS, _X__, __Y_, ___N)
       case 0xE000 =>
@@ -124,7 +124,7 @@ case class ClearScreen(op: String) extends Instruction {
       clearScreen().
       copy(
         pc = state.pc + 2
-    )
+      )
   }
 }
 
@@ -411,7 +411,7 @@ case class IEqIPlusX(op: String, xReg: U8) extends Instruction {
 
     // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#fx55-and-fx65-store-and-load-memory
     // later atari update V15
-    val carry = if (newAddress.toInt > MEM_SIZE-1) U8(1) else U8(0)
+    val carry = if (newAddress.toInt > MEM_SIZE - 1) U8(1) else U8(0)
 
     state.copy(
       index = newAddress,

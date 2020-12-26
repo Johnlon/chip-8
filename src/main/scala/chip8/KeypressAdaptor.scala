@@ -5,10 +5,9 @@ import scala.swing.event.{Key, KeyEvent, KeyPressed, KeyReleased}
 object KeypressAdaptor {
 
   @volatile
-  private var keys = Set.empty[String]
-
-  @volatile
   var keysMappings = Seq.empty[(String, String)]
+  @volatile
+  private var keys = Set.empty[String]
 
   def pressedKeys: Set[String] = {
     keys

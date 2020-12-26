@@ -11,13 +11,9 @@ object Fonts {
     hexFonts.zipWithIndex.foreach {
       case (f, i) =>
         val fontLocn = FontMemAddress + i
-        memory = memory.set(fontLocn.toInt,  f)
+        memory = memory.set(fontLocn.toInt, f)
     }
     state.copy(memory = memory)
-  }
-
-  def fontCharLocation(n: Int): U12 = {
-    FontMemAddress + (n * FontCharWidth)
   }
 
   def hexFonts: Seq[U8] = {
@@ -39,5 +35,9 @@ object Fonts {
       0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
       0xF0, 0x80, 0xF0, 0x80, 0x80 // F
     ).map(x => U8.valueOf(x))
+  }
+
+  def fontCharLocation(n: Int): U12 = {
+    FontMemAddress + (n * FontCharWidth)
   }
 }

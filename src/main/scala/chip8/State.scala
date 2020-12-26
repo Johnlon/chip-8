@@ -1,6 +1,6 @@
 package chip8
 
-import scala.swing.event.{Event, Key}
+import scala.swing.event.Event
 
 object State {
   def NullListener(event: Event): Unit = {}
@@ -30,14 +30,10 @@ case class State(
     var st = this
     (0 until SCREEN_HEIGHT) foreach { y =>
       (0 until SCREEN_WIDTH) foreach { x =>
-        st = st.writePixel(x,y,flip = false)
+        st = st.writePixel(x, y, flip = false)
       }
     }
     st
-  }
-
-  def screenBuffer: Seq[U8] = {
-    memory.slice(SCREEN_BUF_BOT, SCREEN_BUF_TOP+1)
   }
 
   // if flip = False then bit is cleared, otherwise bit is flipped
@@ -76,6 +72,10 @@ case class State(
       register
 
     copy(memory = memory.set(memoryLocation, newByte), register = newReg)
+  }
+
+  def screenBuffer: Seq[U8] = {
+    memory.slice(SCREEN_BUF_BOT, SCREEN_BUF_TOP + 1)
   }
 
   def push(i: U12): State = copy(stack = i +: stack)

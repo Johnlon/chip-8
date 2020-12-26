@@ -1,13 +1,5 @@
 package chip8
 
-import java.io.{File, InputStream}
-
-import chip8.Instructions.decode
-import javax.sound.sampled.{AudioSystem, Clip}
-
-import scala.swing.event.Key
-import scala.swing.{Frame, SimpleSwingApplication}
-
 object RunChip8Emulator extends App {
   private val BLITZ = "BLITZ"
   private val UFO = "UFO"
@@ -32,10 +24,10 @@ object RunChip8Emulator extends App {
   private val ASTRO = "AstroDodge.ch8"
   private val SPACE_FLIGHT = "Space Flight.ch8"
 
-  private val PARTICLE  = "Particle Demo [zeroZshadow, 2008].ch8"
+  private val PARTICLE = "Particle Demo [zeroZshadow, 2008].ch8"
 
 
   private val INVADERS = "INVADERS"
-  Chip8Emulator.main(Array(BLINKY))
+  Chip8Emulator.main(Array(BRIX))
 }
 

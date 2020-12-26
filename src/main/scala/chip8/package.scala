@@ -24,75 +24,74 @@ package object chip8 {
   val emptyRegisters: List[U8] = List.fill(16)(U8(0))
   val emptyMemory: List[U8] = List.fill(MEM_SIZE)(U8(0))
 
-  assert((SCREEN_HEIGHT*SCREEN_WIDTH)/8 == (1 + SCREEN_BUF_TOP - SCREEN_BUF_BOT))
+  assert((SCREEN_HEIGHT * SCREEN_WIDTH) / 8 == (1 + SCREEN_BUF_TOP - SCREEN_BUF_BOT))
+
+  def intTo8Bits(spriteRow: Char): Seq[Boolean] = {
+    f"${spriteRow.toBinaryString}%8s".replace(' ', '0').map(x => x == '1')
+  }
 
   case class U12(x: Int) {
     if (x < 0 || x > 4085)
       sys.error("out of range " + x)
 
-    override def toString =  s"x${x.toHexString}(${x & 0xfff})"
-
-    def toInt: Int = x.toInt
+    override def toString = s"x${x.toHexString}(${x & 0xfff})"
 
     def +(x: Int): U12 = {
       U12(this.toInt + x)
     }
+
+    def toInt: Int = x.toInt
   }
 
   case class U8(ubyte: Char) {
-    override def toString =  s"${ubyte.toHexString}(${ubyte.toInt & 0xff})"
+    override def toString = s"${ubyte.toHexString}(${ubyte.toInt & 0xff})"
 
     def toInt: Int = ubyte.toInt
 
     def isZero: Boolean = ubyte == 0
+
     def isNotZero: Boolean = ubyte != 0
+
     def asOneZero: U8 = if (ubyte != 0) U8(1) else U8(0)
 
     def >(yVal: U8): Boolean = (ubyte > yVal.ubyte)
-//    def >(yVal: Int): Boolean = (ubyte > U8.valueOf(yVal))
+
+    //    def >(yVal: Int): Boolean = (ubyte > U8.valueOf(yVal))
 
     def <(yVal: U8): Boolean = (ubyte < yVal.ubyte)
+
     def ==(other: Int): Boolean = (ubyte == other)
 
     def |(yVal: U8): chip8.U8 = U8.valueOf(ubyte | yVal.ubyte)
+
     def &(yVal: U8): chip8.U8 = U8.valueOf(ubyte & yVal.ubyte)
+
     def ^(yVal: U8): chip8.U8 = U8.valueOf(ubyte ^ yVal.ubyte)
 
     def |(yVal: Int): chip8.U8 = U8.valueOf(ubyte | yVal)
+
     def &(yVal: Int): chip8.U8 = U8.valueOf(ubyte & yVal)
-    def >>(yVal: Int): chip8.U8 = U8.valueOf(ubyte >> yVal )
+
+    def >>(yVal: Int): chip8.U8 = U8.valueOf(ubyte >> yVal)
+
     def <<(yVal: Int): chip8.U8 = U8.valueOf((ubyte << yVal) & 0xff)
+
+    def +(x: Int): U8 = {
+      this + U8.valueOf(x)
+    }
 
     def +(x: U8): U8 = {
       val u = (ubyte + x.ubyte) & 0xff
       U8(u.toChar)
     }
-    def -(x: U8): U8 = {
-      val u = (ubyte - x.ubyte) & 0xff
-      U8(u.toChar)
-    }
-    def +(x: Int): U8 = {
-      this + U8.valueOf(x)
-    }
+
     def -(x: Int): U8 = {
       this - U8.valueOf(x)
     }
-  }
 
-  object U8 {
-    var MAX_INT = 255
-
-
-    def valueOf(b: Boolean) : U8 = if (b) U8(1) else U8(0)
-
-    def valueOf(x: Int): U8 = {
-      if (x < 0 || x > 255)
-        sys.error("out of range " + x)
-      U8((x & 0xff).toChar)
-    }
-
-    def valueOf(s: String, radix: Int): U8 = {
-      U8.valueOf(parseInt(s, radix))
+    def -(x: U8): U8 = {
+      val u = (ubyte - x.ubyte) & 0xff
+      U8(u.toChar)
     }
   }
 
@@ -108,9 +107,10 @@ package object chip8 {
     def b3210: Int = Integer.valueOf(value, 16)
 
     def hexToByte: U8 = U8.valueOf(value, 16)
+
     def hexToInt: Int = Integer.valueOf(value, 16)
 
-//    def hexToInt: Int = Integer.valueOf(value, 16)
+    //    def hexToInt: Int = Integer.valueOf(value, 16)
 
     def set(position: Int, t: Char): String = {
       val buf = value.toBuffer
@@ -146,17 +146,30 @@ package object chip8 {
       buf.toList
     }
   }
-//
-//  implicit class ArrayOps[T](list: Array[T]) {
-//    def set(position: Int, t: T): Array[T] = {
-//      list(position) = t
-//      list
-//    }
-//  }
+
+  //
+  //  implicit class ArrayOps[T](list: Array[T]) {
+  //    def set(position: Int, t: T): Array[T] = {
+  //      list(position) = t
+  //      list
+  //    }
+  //  }
+
+  object U8 {
+    var MAX_INT = 255
 
 
-  def intTo8Bits(spriteRow: Char): Seq[Boolean] = {
-    f"${spriteRow.toBinaryString}%8s".replace(' ', '0').map(x => x == '1')
+    def valueOf(b: Boolean): U8 = if (b) U8(1) else U8(0)
+
+    def valueOf(s: String, radix: Int): U8 = {
+      U8.valueOf(parseInt(s, radix))
+    }
+
+    def valueOf(x: Int): U8 = {
+      if (x < 0 || x > 255)
+        sys.error("out of range " + x)
+      U8((x & 0xff).toChar)
+    }
   }
 
 }
