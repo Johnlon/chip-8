@@ -5,13 +5,13 @@ package object chip8 {
 
   val STATUS_REGISTER_ID: Int = 0xF
 
-  val SCREEN_HEIGHT = 32
-  val SCREEN_WIDTH = 64
+  val C8_SCREEN_HEIGHT = 32
+  val C8_SCREEN_WIDTH = 64
 
   val MEM_SIZE = 4096
 
-  val OLD_INTERPRETER_BOT = 0x000
-  val OLD_INTERPRETER_TOP = 0x1FF
+  //  val OLD_INTERPRETER_BOT = 0x000
+  //  val OLD_INTERPRETER_TOP = 0x1FF
 
   val INTERNAL_BOT = 0xEA0
   val INTERNAL_TOP = 0xEFF
@@ -19,19 +19,19 @@ package object chip8 {
   val SCREEN_BUF_BOT = 0xF00
   val SCREEN_BUF_TOP = 0xFFF
 
-  val INITIAL_PC = U12(0x200)
+  val INITIAL_PC: U12 = U12(0x200)
 
   val emptyRegisters: List[U8] = List.fill(16)(U8(0))
   val emptyMemory: List[U8] = List.fill(MEM_SIZE)(U8(0))
 
-  assert((SCREEN_HEIGHT * SCREEN_WIDTH) / 8 == (1 + SCREEN_BUF_TOP - SCREEN_BUF_BOT))
+  assert((C8_SCREEN_HEIGHT * C8_SCREEN_WIDTH) / 8 == (1 + SCREEN_BUF_TOP - SCREEN_BUF_BOT))
 
   def intTo8Bits(spriteRow: Char): Seq[Boolean] = {
     f"${spriteRow.toBinaryString}%8s".replace(' ', '0').map(x => x == '1')
   }
 
   case class U12(x: Int) {
-    if (x < 0 || x > 4085)
+    if (x < 0 || x > 0xfff)
       sys.error("out of range " + x)
 
     override def toString = s"x${x.toHexString}(${x & 0xfff})"
@@ -156,7 +156,7 @@ package object chip8 {
   //  }
 
   object U8 {
-    var MAX_INT = 255
+    var MAX_U8 = 255
 
 
     def valueOf(b: Boolean): U8 = if (b) U8(1) else U8(0)

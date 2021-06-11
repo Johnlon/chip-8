@@ -3,7 +3,6 @@ package chip8
 object Fonts {
   // http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
   val FontMemAddress: U12 = U12(0x50)
-
   val FontCharWidth: Int = 5
 
   def installFonts(state: State): State = {

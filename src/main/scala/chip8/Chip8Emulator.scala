@@ -40,11 +40,13 @@ object Chip8Emulator extends SwingApplication {
     val emulatorThread = new Thread(new Runnable() {
       override def run(): Unit = {
         while (true) {
+          // display help page if defined
           if (!props.keys.isEmpty) {
             terminalComponent.publish(DisplayKeysEvent(props))
             Thread.sleep(3000)
           }
 
+          // run
           startEmulation(bytes)
           System.exit(1)
           System.out.println("exit!")
@@ -78,7 +80,11 @@ object Chip8Emulator extends SwingApplication {
       }
 
       message("Run ...")
-      var stepMode = false
+
+      var stepMode = true
+      if (stepMode) {
+        message("Step Mode - hit escape to continue")
+      }
 
       var lastCountDownTime = System.nanoTime()
       val countDownIntervalNs60Hz = (1000 * 1000000) / 60
@@ -154,7 +160,7 @@ object Chip8Emulator extends SwingApplication {
 
   private def drawScreen(state: State): Unit = {
     val pixels: Seq[Boolean] = state.screenBuffer.flatMap(x => intTo8Bits(x.ubyte).reverse)
-    val data: Seq[Seq[Boolean]] = pixels.grouped(SCREEN_WIDTH).toSeq
+    val data: Seq[Seq[Boolean]] = pixels.grouped(C8_SCREEN_WIDTH).toSeq
     if (data != oldScreen) terminalComponent.publish(DrawScreenEvent(data))
     oldScreen = data
   }
@@ -171,6 +177,8 @@ object Chip8Emulator extends SwingApplication {
       }
     }
     if (stepMode) {
+      System.out.println("Waiting in step mode - hit enter or escape")
+
       while (!isPressed(Key.Enter) && !isPressed(Key.Escape)) {
         // wait for key
       }
@@ -242,7 +250,6 @@ object Chip8Emulator extends SwingApplication {
 class Key {
   @BeanProperty var desc: String = null
   @BeanProperty var alias: String = null
-
 }
 
 class ExtraProps {

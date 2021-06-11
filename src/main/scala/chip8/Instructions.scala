@@ -45,7 +45,7 @@ object Instructions {
 
     m3 match {
       case 0x0000 => op match {
-        case 0x00E0 => ClearScreen(opS)
+        case 0x00E0 => ClearScreen(opS) // ok
         case 0x00EE => ReturnSub(opS)
         case _ => ObsoleteMachineJump(opS, _NNN)
       }
@@ -213,8 +213,7 @@ case class Display(op: String, xReg: U8, yReg: U8, nHeight: U8) extends Instruct
 
     (0 until height).foreach { y =>
       val location = state.index + y
-      val memory = st.memory
-      val rowOfSprite: U8 = memory.apply(location.toInt)
+      val rowOfSprite: U8 = st.memory(location.toInt)
       val spriteRow = rowOfSprite.ubyte
 
       // convert to a list of bits
@@ -409,8 +408,8 @@ case class IEqIPlusX(op: String, xReg: U8) extends Instruction {
 
     val newAddress = state.index + v.ubyte
 
-    // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#fx55-and-fx65-store-and-load-memory
-    // later atari update V15
+    // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#fx1e-add-to-index overflow flag
+    // later atari updates V15
     val carry = if (newAddress.toInt > MEM_SIZE - 1) U8(1) else U8(0)
 
     state.copy(
@@ -516,7 +515,9 @@ case class AddXPlusYCarry(op: String, xReg: U8, yReg: U8) extends Instruction { 
     val result: Int = x.ubyte + y.ubyte
 
     state.copy(
-      register = state.register.set(xReg, U8.valueOf(result & 0xff)).set(STATUS_REGISTER_ID, U8.valueOf(result > U8.MAX_INT)),
+      register = state.register.
+        set(xReg, U8.valueOf(result & 0xff)).
+        set(STATUS_REGISTER_ID, U8.valueOf(result > U8.MAX_U8)),
       pc = state.pc + 2
     )
   }

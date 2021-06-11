@@ -25,9 +25,11 @@ object RunChip8Emulator extends App {
   private val SPACE_FLIGHT = "Space Flight.ch8"
 
   private val PARTICLE = "Particle Demo [zeroZshadow, 2008].ch8"
+  private val CORAX_TEST = "corax89__test_opcode.ch8"
 
 
   private val INVADERS = "INVADERS"
-  Chip8Emulator.main(Array(BRIX))
+//  Chip8Emulator.main(Array("IBM_Logo.ch8"))
+  Chip8Emulator.main(Array(INVADERS))
 }
 

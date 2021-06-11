@@ -28,8 +28,8 @@ case class State(
 
   def clearScreen(): State = {
     var st = this
-    (0 until SCREEN_HEIGHT) foreach { y =>
-      (0 until SCREEN_WIDTH) foreach { x =>
+    (0 until C8_SCREEN_HEIGHT) foreach { y =>
+      (0 until C8_SCREEN_WIDTH) foreach { x =>
         st = st.writePixel(x, y, flip = false)
       }
     }
@@ -39,10 +39,10 @@ case class State(
   // if flip = False then bit is cleared, otherwise bit is flipped
   def writePixel(x: Int, y: Int, flip: Boolean): State = {
     //x=0,y=0 is at top left of screen and is lowest point in memory
-    val xMod = x % SCREEN_WIDTH
-    val yMod = y % SCREEN_HEIGHT
+    val xMod = x % C8_SCREEN_WIDTH
+    val yMod = y % C8_SCREEN_HEIGHT
 
-    val offset = (yMod * SCREEN_WIDTH) + xMod
+    val offset = (yMod * C8_SCREEN_WIDTH) + xMod
     val byteNum = offset / 8
     val bitNum = offset % 8
 
